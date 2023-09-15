@@ -33,6 +33,8 @@ const beginPrompts = () => {
           "View all departments",
           "View all roles",
           "View all employees",
+          "View employees by manager",
+          "View employees by department",
           "Add a department",
           "Add a role",
           "Add an employee",
@@ -52,6 +54,12 @@ const beginPrompts = () => {
           break;
         case "View all employees":
           viewAllEmployees();
+          break;
+        case "View employees by manager":
+          viewAllEmployeesByManager();
+          break;
+        case "View employees by department":
+          viewAllEmployeesByDepartment();
           break;
         case "Add a department":
           break;
@@ -73,9 +81,7 @@ const viewAllDepartments = () => {
   let sql = `SELECT * FROM department`;
   db.query(sql, (err, res) => {
     if (err) throw err;
-    const departmentArr = [];
-    res.forEach((department) => departmentArr.push(department));
-    console.table(departmentArr);
+    console.table(res);
     beginPrompts();
   });
 };
@@ -85,9 +91,7 @@ const viewAllRoles = () => {
   let sql = `SELECT * FROM role`;
   db.query(sql, (err, res) => {
     if (err) throw err;
-    const rolesArr = [];
-    res.forEach((department) => rolesArr.push(department));
-    console.table(rolesArr);
+    console.table(res);
     beginPrompts();
   });
 };
@@ -97,9 +101,37 @@ const viewAllEmployees = () => {
   let sql = `SELECT * FROM employee`;
   db.query(sql, (err, res) => {
     if (err) throw err;
-    const employeeArr = [];
-    res.forEach((department) => employeeArr.push(department));
-    console.table(employeeArr);
+    console.table(res);
+    beginPrompts();
+  });
+};
+
+const viewAllEmployeesByManager = () => {
+  console.log("All Employees by manager");
+  let sql = `
+   SELECT employee.first_name, employee.last_name, manager_id
+   FROM employee 
+   ORDER BY manager_id`;
+  db.query(sql, (err, res) => {
+    if (err) throw err;
+    console.table(res);
+    beginPrompts();
+  });
+};
+
+const viewAllEmployeesByDepartment = () => {
+  console.log("All Employees by manager");
+  let sql = `
+  SELECT employee.first_name, 
+       employee.last_name, 
+       department.name AS department_name
+  FROM employee
+  JOIN role ON employee.role_id = role.id
+  JOIN department ON role.department_id = department.id;
+`;
+  db.query(sql, (err, res) => {
+    if (err) throw err;
+    console.table(res);
     beginPrompts();
   });
 };
