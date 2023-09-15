@@ -17,4 +17,4 @@ VALUES ("John", "Smith", 1, 1),
        ("Max", "Vanguard", 4, 4),
        ("Stella", "Moonshine", 2, 5),
        ("Misty", "Hollow", 1, 6),
-       ("Lily", "Cat", 4, 7gi);
+       ("Lily", "Cat", 4, 7);
