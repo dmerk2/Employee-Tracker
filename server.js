@@ -62,8 +62,10 @@ const beginPrompts = () => {
           viewAllEmployeesByDepartment();
           break;
         case "Add a department":
+          addDepartment();
           break;
         case "Add a role":
+          addRole();
           break;
         case "Add an employee":
           break;
@@ -134,6 +136,65 @@ const viewAllEmployeesByDepartment = () => {
     console.table(res);
     beginPrompts();
   });
+};
+
+const addDepartment = () => {
+  inquirer
+    .prompt([
+      {
+        type: "input",
+        name: "department_name",
+        message: "What department would you like to add?",
+      },
+    ])
+    .then((res) => {
+      const sql = `
+    INSERT INTO department (name) 
+    VALUES (?);
+    `;
+      db.query(sql, [res.department_name], (err, res) => {
+        if (err) throw err;
+        console.log(`Added department: ${res.department_name}`);
+        viewAllDepartments();
+      });
+    });
+};
+
+const addRole = () => {
+  inquirer
+    .prompt([
+      {
+        type: "input",
+        name: "role",
+        message: "What new role would you like to add?",
+      },
+      {
+        type: "input",
+        name: "salary",
+        message: "What is the salary?",
+      },
+      {
+        type: "input",
+        name: "department_ID",
+        message: "What department ID will the employee be employed in?",
+      },
+    ])
+    .then((res) => {
+      const sql = `
+      INSERT INTO role (title, salary, department_ID) VALUE (?, ?, ?);
+    `;
+      db.query(
+        sql,
+        [res.role, res.salary, res.department_ID],
+        (err, result) => {
+          if (err) throw err;
+          console.log(
+            `Added Role: ${res.role} Salary: ${res.salary} Department ID: ${res.department_ID}`
+          );
+          viewAllRoles();
+        }
+      );
+    });
 };
 
 const quit = () => {
