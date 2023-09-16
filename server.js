@@ -39,6 +39,7 @@ const beginPrompts = () => {
           "Add a role",
           "Add an employee",
           "Update an employee role",
+          "Update an employees manager",
           "Delete an employee",
           "Delete a department",
           "Delete a role",
@@ -46,6 +47,7 @@ const beginPrompts = () => {
         ],
       },
     ])
+    // Dependent on the user input, run the function for the according case
     .then((res) => {
       const response = res.title;
       switch (response) {
@@ -75,6 +77,9 @@ const beginPrompts = () => {
           break;
         case "Update an employee role":
           updateEmployee();
+          break;
+        case "Update an employees manager":
+          updateEmployeeManager();
           break;
         case "Delete an employee":
           deleteEmployee();
@@ -188,7 +193,6 @@ const addDepartment = () => {
 };
 
 const addRole = () => {
-  // Query the database to get a list of departments
   const getDepartmentList = `
     SELECT id, name
     FROM department
@@ -197,7 +201,7 @@ const addRole = () => {
   db.query(getDepartmentList, (err, departments) => {
     if (err) throw err;
 
-    const choices = departments.map((department) => ({
+    const departmentChoices = departments.map((department) => ({
       name: department.name,
       value: department.id,
     }));
@@ -218,7 +222,7 @@ const addRole = () => {
           type: "list",
           name: "department_ID",
           message: "What department will the employee be employed in?",
-          choices: choices,
+          choices: departmentChoices,
         },
       ])
       .then((res) => {
@@ -231,7 +235,11 @@ const addRole = () => {
           (err, result) => {
             if (err) throw err;
             console.log(
-              `Added Role: ${res.role} Salary: ${res.salary} Department ID: ${res.department_ID}`
+              `Added Role: ${res.role} Salary: ${res.salary} Department: ${
+                departmentChoices.find(
+                  (department) => department.value === res.department_ID
+                ).name
+              }`
             );
             viewAllRoles();
           }
@@ -266,6 +274,9 @@ const addEmployee = () => {
         name: manager.manager_name,
         value: manager.id,
       }));
+
+      // Add the "None" option
+      managerChoices.push({ name: "None", value: null });
 
       const roleChoices = roles.map((role) => ({
         name: role.title,
@@ -308,8 +319,17 @@ const addEmployee = () => {
             (err, result) => {
               if (err) throw err;
               console.log(
-                `Added Employee: First Name: ${res.first_name} Last Name: ${res.last_name} Role ID: ${res.role} Manager ID: ${res.manager}`
+                `Added Employee: First Name: ${res.first_name} Last Name: ${
+                  res.last_name
+                } Role: ${
+                  roleChoices.find((role) => role.value === res.role).name
+                } Manager: ${
+                  managerChoices.find(
+                    (manager) => manager.value === res.manager
+                  ).name
+                }`
               );
+
               viewAllEmployees();
             }
           );
@@ -383,6 +403,78 @@ const updateEmployee = () => {
   });
 };
 
+const updateEmployeeManager = () => {
+  const getManagerListQuery = `
+    SELECT id, CONCAT(first_name, ' ', last_name) AS manager_name
+    FROM employee
+    WHERE id IN (
+      SELECT DISTINCT manager_id
+      FROM employee
+      WHERE manager_id IS NOT NULL
+    );
+  `;
+
+  const getEmployeeListQuery = `
+    SELECT id, CONCAT(first_name, ' ', last_name) AS employee_name
+    FROM employee
+    WHERE manager_id IS NOT NULL
+  `;
+
+  db.query(getManagerListQuery, (err, managers) => {
+    if (err) throw err;
+
+    const managerChoices = managers.map((manager) => ({
+      name: manager.manager_name,
+      value: manager.id,
+    }));
+
+    db.query(getEmployeeListQuery, (err, employees) => {
+      if (err) throw err;
+
+      const employeeChoices = employees.map((employee) => ({
+        name: employee.employee_name,
+        value: employee.id,
+      }));
+
+      inquirer
+        .prompt([
+          {
+            type: "list",
+            name: "employee",
+            message: "Which employee would you like to update?",
+            choices: employeeChoices,
+          },
+          {
+            type: "list",
+            name: "newManager",
+            message: "Select the new manager for the employee:",
+            choices: managerChoices,
+          },
+        ])
+        .then((res) => {
+          const query = `
+            UPDATE employee SET manager_id = ? WHERE id = ?
+          `;
+          db.query(query, [res.newManager, res.employee], (err, result) => {
+            if (err) throw err;
+            // Retrieve the selected employee's name
+            const selectedEmployee = employees.find(
+              (employee) => employee.id === res.employee
+            );
+            const selectedManager = managers.find(
+              (manager) => manager.id === res.newManager
+            );
+
+            console.log(
+              `Updated ${selectedEmployee.employee_name}'s manager to ${selectedManager.manager_name}`
+            );
+            viewAllEmployees();
+          });
+        });
+    });
+  });
+};
+
 const deleteEmployee = () => {
   // Query the database to get a list of employees
   const getEmployeeList = `
@@ -394,7 +486,7 @@ const deleteEmployee = () => {
     if (err) throw err;
 
     // Extract employee names and ids from the query result
-    const choices = employees.map((employee) => ({
+    const employeeChoices = employees.map((employee) => ({
       name: employee.employee_name,
       value: employee.id,
     }));
@@ -405,7 +497,7 @@ const deleteEmployee = () => {
           type: "list",
           name: "employee",
           message: "Which employee would you like to delete?",
-          choices: choices,
+          choices: employeeChoices,
         },
       ])
       .then((res) => {
@@ -436,7 +528,7 @@ const deleteRole = () => {
     if (err) throw err;
 
     // Extract employee names and ids from the query result
-    const choices = roles.map((role) => ({
+    const roleChoices = roles.map((role) => ({
       name: role.title,
       value: role.id,
     }));
@@ -447,7 +539,7 @@ const deleteRole = () => {
           type: "list",
           name: "role",
           message: "Which role would you like to delete?",
-          choices: choices,
+          choices: roleChoices,
         },
       ])
       .then((res) => {
@@ -476,7 +568,7 @@ const deleteDepartment = () => {
     if (err) throw err;
 
     // Extract department names and ids from the query result
-    const choices = departments.map((department) => ({
+    const departmentChoices = departments.map((department) => ({
       name: department.name,
       value: department.id,
     }));
@@ -487,7 +579,7 @@ const deleteDepartment = () => {
           type: "list",
           name: "department",
           message: "Which department would you like to delete?",
-          choices: choices,
+          choices: departmentChoices,
         },
       ])
       .then((res) => {
