@@ -68,20 +68,23 @@ const beginPrompts = () => {
           addRole();
           break;
         case "Add an employee":
+          addEmployee();
           break;
         case "Update an employee role":
           break;
         case "Quit":
           quit();
           break;
+        default:
+          viewAllDepartments();
       }
     });
 };
 
 const viewAllDepartments = () => {
   console.log("All Departments");
-  let sql = `SELECT * FROM department`;
-  db.query(sql, (err, res) => {
+  let query = `SELECT * FROM department`;
+  db.query(query, (err, res) => {
     if (err) throw err;
     console.table(res);
     beginPrompts();
@@ -90,8 +93,8 @@ const viewAllDepartments = () => {
 
 const viewAllRoles = () => {
   console.log("All Roles");
-  let sql = `SELECT * FROM role`;
-  db.query(sql, (err, res) => {
+  let query = `SELECT * FROM role`;
+  db.query(query, (err, res) => {
     if (err) throw err;
     console.table(res);
     beginPrompts();
@@ -100,8 +103,8 @@ const viewAllRoles = () => {
 
 const viewAllEmployees = () => {
   console.log("All Employees");
-  let sql = `SELECT * FROM employee`;
-  db.query(sql, (err, res) => {
+  let query = `SELECT * FROM employee`;
+  db.query(query, (err, res) => {
     if (err) throw err;
     console.table(res);
     beginPrompts();
@@ -110,11 +113,11 @@ const viewAllEmployees = () => {
 
 const viewAllEmployeesByManager = () => {
   console.log("All Employees by manager");
-  let sql = `
+  let query = `
    SELECT employee.first_name, employee.last_name, manager_id
    FROM employee 
    ORDER BY manager_id`;
-  db.query(sql, (err, res) => {
+  db.query(query, (err, res) => {
     if (err) throw err;
     console.table(res);
     beginPrompts();
@@ -123,15 +126,16 @@ const viewAllEmployeesByManager = () => {
 
 const viewAllEmployeesByDepartment = () => {
   console.log("All Employees by manager");
-  let sql = `
+  let query = `
   SELECT employee.first_name, 
        employee.last_name, 
        department.name AS department_name
   FROM employee
   JOIN role ON employee.role_id = role.id
-  JOIN department ON role.department_id = department.id;
+  JOIN department ON role.department_id = department.id
+  ORDER BY department_name;
 `;
-  db.query(sql, (err, res) => {
+  db.query(query, (err, res) => {
     if (err) throw err;
     console.table(res);
     beginPrompts();
@@ -144,15 +148,15 @@ const addDepartment = () => {
       {
         type: "input",
         name: "department_name",
-        message: "What department would you like to add?",
+        message: "What is the name of the department?",
       },
     ])
     .then((res) => {
-      const sql = `
+      const query = `
     INSERT INTO department (name) 
     VALUES (?);
     `;
-      db.query(sql, [res.department_name], (err, res) => {
+      db.query(query, [res.department_name], (err, result) => {
         if (err) throw err;
         console.log(`Added department: ${res.department_name}`);
         viewAllDepartments();
@@ -166,12 +170,12 @@ const addRole = () => {
       {
         type: "input",
         name: "role",
-        message: "What new role would you like to add?",
+        message: "What is the name of the role?",
       },
       {
         type: "input",
         name: "salary",
-        message: "What is the salary?",
+        message: "What is the salary of the role?",
       },
       {
         type: "input",
@@ -180,11 +184,11 @@ const addRole = () => {
       },
     ])
     .then((res) => {
-      const sql = `
-      INSERT INTO role (title, salary, department_ID) VALUE (?, ?, ?);
+      const query = `
+      INSERT INTO role (title, salary, department_id) VALUES (?, ?, ?);
     `;
       db.query(
-        sql,
+        query,
         [res.role, res.salary, res.department_ID],
         (err, result) => {
           if (err) throw err;
@@ -192,6 +196,48 @@ const addRole = () => {
             `Added Role: ${res.role} Salary: ${res.salary} Department ID: ${res.department_ID}`
           );
           viewAllRoles();
+        }
+      );
+    });
+};
+
+const addEmployee = () => {
+  inquirer
+    .prompt([
+      {
+        type: "input",
+        name: "first_name",
+        message: "What is the employee's first name?",
+      },
+      {
+        type: "input",
+        name: "last_name",
+        message: "What is the employee's last name?",
+      },
+      {
+        type: "input",
+        name: "role",
+        message: "What is the employee's role ID?",
+      },
+      {
+        type: "input",
+        name: "manager",
+        message: "Who is the employee's manager ID?",
+      },
+    ])
+    .then((res) => {
+      const query = `
+      INSERT INTO employee (first_name, last_name, role_id, manager_id) 
+      VALUES (?, ?, ?, ?)
+    `;
+      db.query(
+        query, [res.first_name, res.last_name, res.role, res.manager],
+        (err, result) => {
+          if (err) throw err;
+          console.log(
+            `Added Employee: First Name:${res.first_name} Last Name:${res.last_name} Role: ${res.role} Manager: ${res.manager}`
+          );
+          viewAllEmployees();
         }
       );
     });
