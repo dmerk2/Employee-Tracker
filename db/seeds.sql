@@ -14,10 +14,10 @@ VALUES ("Manager", 125233, 1),
 
 -- Seed the employee table
 INSERT INTO employee(first_name, last_name, role_id, manager_id)
-VALUES ("John", "Smith", 1, 1),
-       ("Peter", "Jones", 2, 2),
+VALUES ("John", "Smith", 1, 2),
+       ("Peter", "Jones", 2, 3),
        ("Michael", "Doe", 3, 3),
-       ("Max", "Vanguard", 4, 4),
-       ("Stella", "Moonshine", 2, 5),
-       ("Misty", "Hollow", 1, 6),
-       ("Lily", "Cat", 4, 7);
+       ("Max", "Vanguard", 4, 5),
+       ("Stella", "Moonshine", 2, 2),
+       ("Misty", "Hollow", 1, 2),
+       ("Lily", "Cat", 4, 2);
