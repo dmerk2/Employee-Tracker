@@ -17,6 +17,32 @@
 
 ## Description
 
+- **View All Departments, Roles, and Employees:** Upon starting the application, users are presented with options to view all existing departments, roles, and employees.
+
+- **View Department Information:** Choosing to view departments displays a formatted table containing department names and their corresponding IDs.
+
+- **View Role Details:** Selecting the 'View Roles' option provides job title, role ID, associated department, and salary information for each role.
+
+- **View Employee Information:** Opting to view employees presents a table with comprehensive employee data, including IDs, names, job titles, departments, salaries, and their respective managers.
+
+- **Add New Department:** Users are prompted to enter the name of a new department, which is then seamlessly added to the database.
+
+- **Add New Role:** Users can add a new role by providing details like name, salary, and associated department.
+
+- **Add New Employee:** When selecting to add an employee, users input first name, last name, role, and manager information, successfully integrating the new employee into the system.
+
+- **Update Employee Role:** Users can choose to update an employee's role. They select an employee and specify the new role, and this information is promptly updated in the database.
+
+- **Update Employee Managers:** This application feature allows users to update the manager of an employee, providing flexibility in organizational structure.
+
+- **View Employees by Manager:** Users can view employees based on their respective managers, enabling a hierarchical view of the organization.
+
+- **View Employees by Department:** This functionality allows users to see a list of employees categorized by department.
+
+- **Delete Departments, Roles, and Employees:** Users have the ability to delete records, providing comprehensive control over the system's data.
+
+- **Calculate Total Department Budget:** The application calculates the total combined salaries of all employees within a specific department, aiding in budget planning and allocation.
+
 ## Installation
 
 Clone the repository to your local machine
