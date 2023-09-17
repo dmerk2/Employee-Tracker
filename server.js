@@ -40,6 +40,7 @@ const beginPrompts = () => {
           "Add an employee",
           "Update an employee role",
           "Update an employees manager",
+          "View department budget",
           "Delete an employee",
           "Delete a department",
           "Delete a role",
@@ -80,6 +81,9 @@ const beginPrompts = () => {
           break;
         case "Update an employees manager":
           updateEmployeeManager();
+          break;
+        case "View department budget":
+          viewDepartmentBudget();
           break;
         case "Delete an employee":
           deleteEmployee();
@@ -417,8 +421,7 @@ const updateEmployeeManager = () => {
   const getEmployeeListQuery = `
     SELECT id, CONCAT(first_name, ' ', last_name) AS employee_name
     FROM employee
-    WHERE manager_id IS NOT NULL
-  `;
+      `;
 
   db.query(getManagerListQuery, (err, managers) => {
     if (err) throw err;
@@ -427,6 +430,9 @@ const updateEmployeeManager = () => {
       name: manager.manager_name,
       value: manager.id,
     }));
+
+    // Add the "None" option
+    managerChoices.push({ name: "None", value: null });
 
     db.query(getEmployeeListQuery, (err, employees) => {
       if (err) throw err;
@@ -453,25 +459,46 @@ const updateEmployeeManager = () => {
         ])
         .then((res) => {
           const query = `
-            UPDATE employee SET manager_id = ? WHERE id = ?
-          `;
+        UPDATE employee SET manager_id = ? WHERE id = ?
+      `;
           db.query(query, [res.newManager, res.employee], (err, result) => {
             if (err) throw err;
             // Retrieve the selected employee's name
             const selectedEmployee = employees.find(
               (employee) => employee.id === res.employee
             );
+
+            // Check if a manager was selected
             const selectedManager = managers.find(
               (manager) => manager.id === res.newManager
             );
 
             console.log(
-              `Updated ${selectedEmployee.employee_name}'s manager to ${selectedManager.manager_name}`
+              `Updated ${selectedEmployee.employee_name}'s manager to ${
+                selectedManager ? selectedManager.manager_name : "None"
+              }`
             );
             viewAllEmployees();
           });
         });
     });
+  });
+};
+
+const viewDepartmentBudget = () => {
+  const query = `
+    SELECT d.name AS department, SUM(r.salary) AS total_budget
+    FROM employee e
+    JOIN role r ON e.role_id = r.id
+    JOIN department d ON r.department_id = d.id
+    GROUP BY d.name
+  `;
+
+  db.query(query, (err, result) => {
+    if (err) throw err;
+
+    console.table(result);
+    beginPrompts();
   });
 };
 
