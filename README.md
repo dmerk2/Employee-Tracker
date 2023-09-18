@@ -9,6 +9,7 @@
 - [Description](#description)
 - [Installation](#installation)
 - [Walkthrough Video](#walkthrough-video)
+- [Usage](#usage)
 - [License](#license)
 - [Contributing](#contributing)
 - [Tests](#tests)
@@ -79,6 +80,13 @@ Add the seeds.sql to populate the database
 ## Walkthrough Video
 
 Click the lightning bolt [⚡](https://watch.screencastify.com/v/rd5bwgJrwA3vss2g7tPJ) to view the Employee Tracker in action!
+
+## Usage
+
+<video width="500" height="300" controls>
+  <source src="./assets/preview.mp4" type="video/mp4">
+  Your browser does not support the video tag.
+</video>
 
 ## License
 
