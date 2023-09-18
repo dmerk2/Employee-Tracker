@@ -10,6 +10,7 @@ const db = mysql.createConnection(
   {
     host: "localhost",
     user: "root",
+    // Enter your password here
     password: process.env.SQL_PASSWORD,
     database: "employees_db",
   },
@@ -104,6 +105,7 @@ const beginPrompts = () => {
 };
 
 const viewAllDepartments = () => {
+  // Select all the data from the table department and display it in a table
   let query = `SELECT * FROM department`;
   db.query(query, (err, res) => {
     if (err) throw err;
@@ -113,6 +115,7 @@ const viewAllDepartments = () => {
 };
 
 const viewAllRoles = () => {
+  // Select the role id, title, salary and department name to join into one table
   let query = `
     SELECT r.id, r.title AS role, r.salary, d.name AS department
     FROM role r
@@ -127,6 +130,7 @@ const viewAllRoles = () => {
 };
 
 const viewAllEmployees = () => {
+  // SQL query to retrieve information about all employees
   let query = `
   SELECT e.id, e.first_name, e.last_name, r.title AS role, r.salary, d.name AS department, 
   CONCAT(m.first_name, ' ', m.last_name) AS manager
@@ -136,8 +140,12 @@ const viewAllEmployees = () => {
   LEFT JOIN department d ON r.department_id = d.id;
   `;
 
+  // Execute the query using the db object
   db.query(query, (err, res) => {
+    // Check if there's an error
     if (err) throw err;
+
+    // Display the result as a table
     console.table(res);
     beginPrompts();
   });
@@ -175,6 +183,7 @@ const viewAllEmployeesByDepartment = () => {
 };
 
 const addDepartment = () => {
+  // Prompt the user to input the name of the department
   inquirer
     .prompt([
       {
@@ -184,12 +193,18 @@ const addDepartment = () => {
       },
     ])
     .then((res) => {
+      // SQL query to insert a new department into the database
       const query = `
-    INSERT INTO department (name) 
-    VALUES (?);
-    `;
+        INSERT INTO department (name) 
+        VALUES (?);
+      `;
+
+      // Execute the query with the user's input as a parameter
       db.query(query, [res.department_name], (err, result) => {
+        // Check if there's an error
         if (err) throw err;
+
+        // Log a success message indicating the added department
         console.log(`Added department: ${res.department_name}`);
         viewAllDepartments();
       });
@@ -197,19 +212,24 @@ const addDepartment = () => {
 };
 
 const addRole = () => {
+  // SQL query to get a list of departments for user to choose from
   const getDepartmentList = `
     SELECT id, name
     FROM department
   `;
 
+  // Execute the query to get a list of departments
   db.query(getDepartmentList, (err, departments) => {
+    // Check if there's an error
     if (err) throw err;
 
+    // Map the departments to an array of choices for the inquirer prompt
     const departmentChoices = departments.map((department) => ({
       name: department.name,
       value: department.id,
     }));
 
+    // Prompt the user for role information
     inquirer
       .prompt([
         {
@@ -230,14 +250,20 @@ const addRole = () => {
         },
       ])
       .then((res) => {
+        // SQL query to insert a new role into the database
         const query = `
           INSERT INTO role (title, salary, department_id) VALUES (?, ?, ?);
         `;
+
+        // Execute the query with the user's input as parameters
         db.query(
           query,
           [res.role, res.salary, res.department_ID],
           (err, result) => {
+            // Check if there's an error
             if (err) throw err;
+
+            // Log a success message indicating the added role
             console.log(
               `Added Role: ${res.role} Salary: ${res.salary} Department: ${
                 departmentChoices.find(
@@ -251,6 +277,7 @@ const addRole = () => {
       });
   });
 };
+
 
 const addEmployee = () => {
   const getManagerList = `
@@ -279,11 +306,14 @@ const addEmployee = () => {
         value: manager.id,
       }));
 
-      // Add the "None" option
+      // Add the "None" option and display the value as null
       managerChoices.push({ name: "None", value: null });
 
+      // Map the roles to an array 
       const roleChoices = roles.map((role) => ({
+        // Display the role title as the choice name
         name: role.title,
+        // Use the role ID as the value for the choice
         value: role.id,
       }));
 
@@ -537,7 +567,7 @@ const deleteEmployee = () => {
           const selectedEmployee = employees.find(
             (employee) => employee.id === res.employee
           );
-          console.log(`Deleted employee ${selectedEmployee.employee_name}`);
+          console.log(`Deleted employee ${selectedEmployee.name}`);
           viewAllEmployees();
         });
       });
@@ -577,7 +607,7 @@ const deleteRole = () => {
           if (err) throw err;
           // Retrieve the selected role's
           const selectedRole = roles.find((role) => role.id === res.role);
-          console.log(`Deleted role ${selectedRole.role_title}`);
+          console.log(`Deleted role ${selectedRole.title}`);
           viewAllRoles();
         });
       });
@@ -620,7 +650,7 @@ const deleteDepartment = () => {
             (department) => department.id === res.department
           );
           console.log(
-            `Deleted department ${selectedDepartment.department_name}`
+            `Deleted department ${selectedDepartment.name}`
           );
           viewAllDepartments();
         });
