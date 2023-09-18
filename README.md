@@ -8,7 +8,6 @@
 
 - [Description](#description)
 - [Installation](#installation)
-- [Usage](#usage)
 - [Walkthrough Video](#walkthrough-video)
 - [License](#license)
 - [Contributing](#contributing)
@@ -65,23 +64,21 @@ Log into mysql on local machine than enter password
 3. mysql -u root -p
 ```
 
-Add the schema.sql
+Add the schema.sql to create the database structure
 
 ```sh
 4. SOURCE schema.sql;
 ```
 
-Add the seeds.sql to the database
+Add the seeds.sql to populate the database
 
 ```sh
 5. SOURCE seeds.sql;
 ```
 
-## Usage
-
 ## Walkthrough Video
 
-Click the lightning bolt [⚡]()
+Click the lightning bolt [⚡](https://watch.screencastify.com/v/rd5bwgJrwA3vss2g7tPJ) to view the Employee Tracker in action!
 
 ## License
 
